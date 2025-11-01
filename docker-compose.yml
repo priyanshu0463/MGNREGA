@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_DB: app
       POSTGRES_USER: app
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - db_data:/var/lib/postgresql/data
     ports:
@@ -31,9 +31,9 @@ services:
     build: ./backend
     container_name: mgnrega_api
     environment:
-      DATABASE_URL: postgresql://app:${DB_PASSWORD:-secret}@db:5432/app
-      DATAGOV_KEY: ${DATAGOV_KEY:-}
-      DATAGOV_RESOURCE_ID: ${DATAGOV_RESOURCE_ID:-}
+      DATABASE_URL: postgresql://app:${DB_PASSWORD}@db:5432/app
+      DATAGOV_KEY: ${DATAGOV_KEY}
+      DATAGOV_RESOURCE_ID: ${DATAGOV_RESOURCE_ID}
     ports:
       - "8000:8000"
     depends_on:
@@ -47,11 +47,11 @@ services:
       dockerfile: worker/Dockerfile
     container_name: mgnrega_worker
     environment:
-      DATABASE_URL: postgresql://app:${DB_PASSWORD:-secret}@db:5432/app
+      DATABASE_URL: postgresql://app:${DB_PASSWORD}@db:5432/app
       REDIS_URL: redis://redis:6379/0
-      DATAGOV_KEY: ${DATAGOV_KEY:-}
-      DATAGOV_RESOURCE_ID: ${DATAGOV_RESOURCE_ID:-}
-      INGEST_STATE: ${INGEST_STATE:-Uttar Pradesh}
+      DATAGOV_KEY: ${DATAGOV_KEY}
+      DATAGOV_RESOURCE_ID: ${DATAGOV_RESOURCE_ID}
+      INGEST_STATE: ${INGEST_STATE}
     depends_on:
       - db
       - redis
@@ -61,7 +61,7 @@ services:
     build: ./frontend
     container_name: mgnrega_frontend
     environment:
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     ports:
       - "3000:3000"
     depends_on:
