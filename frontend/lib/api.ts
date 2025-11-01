@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Use Next.js API routes (same origin - no CORS issues)
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -62,30 +63,35 @@ export interface DistrictTrends {
 
 export const apiClient = {
   getDistricts: async (stateName?: string): Promise<District[]> => {
+    const url = API_BASE_URL ? `/api/districts` : '/api/districts';
     const params = stateName ? { state_name: stateName } : {};
-    const response = await api.get('/districts', { params });
+    const response = await api.get(url, { params });
     return response.data;
   },
 
   getDistrictCurrent: async (districtId: number): Promise<DistrictCurrentMetrics> => {
-    const response = await api.get(`/district/${districtId}/current`);
+    const url = API_BASE_URL ? `/api/district/${districtId}` : `/api/district/${districtId}`;
+    const response = await api.get(url);
     return response.data;
   },
 
   getDistrictTrends: async (districtId: number, months: number = 12): Promise<DistrictTrends> => {
-    const response = await api.get(`/district/${districtId}/trends`, {
+    const url = API_BASE_URL ? `/api/district/${districtId}/trends` : `/api/district/${districtId}/trends`;
+    const response = await api.get(url, {
       params: { months },
     });
     return response.data;
   },
 
   detectDistrict: async (latitude: number, longitude: number): Promise<{ district_name?: string; state_name?: string; found: boolean }> => {
-    const response = await api.post('/detect-district', { latitude, longitude });
+    const url = API_BASE_URL ? '/api/detect-district' : '/api/detect-district';
+    const response = await api.post(url, { latitude, longitude });
     return response.data;
   },
 
   getSnapshotDate: async (): Promise<{ snapshot_date?: string }> => {
-    const response = await api.get('/snapshot-date');
+    const url = API_BASE_URL ? '/api/snapshot-date' : '/api/snapshot-date';
+    const response = await api.get(url);
     return response.data;
   },
 };
