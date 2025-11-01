@@ -1,0 +1,19 @@
+{
+  "title": "MGNREGA Dashboard",
+  "subtitle": "Mahatma Gandhi National Rural Employment Guarantee Act",
+  "selectDistrict": "Select District",
+  "useLocation": "Use My Location",
+  "personDays": "Person-days Generated",
+  "households": "Total Households Worked",
+  "avgDays": "Average Days per Household",
+  "wages": "Wages Disbursed",
+  "womenPct": "Women Participation",
+  "month": "Month",
+  "year": "Year",
+  "trends": "Trends",
+  "loading": "Loading...",
+  "noData": "No data available",
+  "offline": "Offline Mode",
+  "listen": "Listen"
+}
+
