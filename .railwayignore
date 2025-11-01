@@ -1,0 +1,12 @@
+# Ignore these files from Railway deployment
+docker-compose.yml
+docker-compose.local.yml
+backend/
+worker/
+*.md
+!.railwayignore
+RAILWAY_*
+DEPLOY*.md
+.env
+.env.local
+
