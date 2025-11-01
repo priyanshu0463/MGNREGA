@@ -1,11 +1,5 @@
-# Railway configuration file
-# This helps Railway understand your project structure
+# Railway configuration - tells Railway this is a multi-service project
+# Deploy services individually, not via docker-compose
 
 [build]
-builder = "nixpacks"  # Railway will auto-detect
-
-[deploy]
-startCommand = "echo 'Deploy individual services, not via docker-compose'"
-healthcheckPath = "/health"
-healthcheckTimeout = 100
-
+builder = "nixpacks"
