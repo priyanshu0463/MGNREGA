@@ -3,9 +3,11 @@ import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import DistrictSelector from '../components/DistrictSelector';
 import KPICard from '../components/KPICard';
+import ConnectionStatus from '../components/ConnectionStatus';
 import { District, apiClient } from '../lib/api';
 import { FiUsers, FiCalendar, FiDollarSign, FiUser } from 'react-icons/fi';
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
+import axios from 'axios';
 
 export default function Home() {
   const router = useRouter();
@@ -17,8 +19,10 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [snapshotDate, setSnapshotDate] = useState<string | null>(null);
   const [offline, setOffline] = useState(false);
+  const [backendAvailable, setBackendAvailable] = useState<boolean | null>(null);
 
   useEffect(() => {
+    checkBackendStatus();
     checkSnapshotDate();
     checkOnlineStatus();
     
@@ -34,6 +38,16 @@ export default function Home() {
       }
     }
   }, []);
+
+  const checkBackendStatus = async () => {
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    try {
+      const response = await axios.get(`${backendUrl}/health`, { timeout: 3000 });
+      setBackendAvailable(response.status === 200);
+    } catch (error) {
+      setBackendAvailable(false);
+    }
+  };
 
   useEffect(() => {
     if (selectedDistrict) {
@@ -118,6 +132,8 @@ export default function Home() {
 
   return (
     <Layout title="MGNREGA Dashboard">
+      <ConnectionStatus isBackendAvailable={backendAvailable} />
+
       {offline && (
         <div className="offline-banner">
           ⚠️ Offline Mode - Showing cached data

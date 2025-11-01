@@ -1,12 +1,48 @@
 import axios from 'axios';
 
-// Use Next.js API routes (same origin - no CORS issues)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+// Primary: External backend API (FastAPI)
+// Fallback: Next.js API routes (frontend API routes)
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const FRONTEND_API_URL = ''; // Same origin - Next.js API routes
 
-const api = axios.create({
-  baseURL: API_BASE_URL,
+// Create two axios instances
+const backendApi = axios.create({
+  baseURL: BACKEND_API_URL,
+  timeout: 5000, // Shorter timeout for faster fallback
+});
+
+const frontendApi = axios.create({
+  baseURL: FRONTEND_API_URL,
   timeout: 10000,
 });
+
+// Helper function to try backend first, fallback to frontend
+async function tryBackendThenFrontend<T>(
+  backendCall: () => Promise<T>,
+  frontendCall: () => Promise<T>
+): Promise<T> {
+  try {
+    // Try backend first
+    return await backendCall();
+  } catch (error: any) {
+    // If backend fails (network error, timeout, 5xx), use frontend fallback
+    if (
+      !error.response || 
+      error.code === 'ECONNREFUSED' || 
+      error.code === 'ETIMEDOUT' ||
+      error.response?.status >= 500
+    ) {
+      console.warn('Backend unavailable, using frontend fallback');
+      try {
+        return await frontendCall();
+      } catch (fallbackError) {
+        throw fallbackError;
+      }
+    }
+    // If it's a client error (4xx), throw original error
+    throw error;
+  }
+}
 
 export interface District {
   id: number;
@@ -63,36 +99,84 @@ export interface DistrictTrends {
 
 export const apiClient = {
   getDistricts: async (stateName?: string): Promise<District[]> => {
-    const url = API_BASE_URL ? `/api/districts` : '/api/districts';
     const params = stateName ? { state_name: stateName } : {};
-    const response = await api.get(url, { params });
-    return response.data;
+    
+    return tryBackendThenFrontend(
+      // Backend call
+      async () => {
+        const response = await backendApi.get('/districts', { params });
+        return response.data;
+      },
+      // Frontend fallback
+      async () => {
+        const response = await frontendApi.get('/api/districts', { params });
+        return response.data;
+      }
+    );
   },
 
   getDistrictCurrent: async (districtId: number): Promise<DistrictCurrentMetrics> => {
-    const url = API_BASE_URL ? `/api/district/${districtId}` : `/api/district/${districtId}`;
-    const response = await api.get(url);
-    return response.data;
+    return tryBackendThenFrontend(
+      // Backend call
+      async () => {
+        const response = await backendApi.get(`/district/${districtId}/current`);
+        return response.data;
+      },
+      // Frontend fallback
+      async () => {
+        const response = await frontendApi.get(`/api/district/${districtId}`);
+        return response.data;
+      }
+    );
   },
 
   getDistrictTrends: async (districtId: number, months: number = 12): Promise<DistrictTrends> => {
-    const url = API_BASE_URL ? `/api/district/${districtId}/trends` : `/api/district/${districtId}/trends`;
-    const response = await api.get(url, {
-      params: { months },
-    });
-    return response.data;
+    return tryBackendThenFrontend(
+      // Backend call
+      async () => {
+        const response = await backendApi.get(`/district/${districtId}/trends`, {
+          params: { months },
+        });
+        return response.data;
+      },
+      // Frontend fallback
+      async () => {
+        const response = await frontendApi.get(`/api/district/${districtId}/trends`, {
+          params: { months },
+        });
+        return response.data;
+      }
+    );
   },
 
   detectDistrict: async (latitude: number, longitude: number): Promise<{ district_name?: string; state_name?: string; found: boolean }> => {
-    const url = API_BASE_URL ? '/api/detect-district' : '/api/detect-district';
-    const response = await api.post(url, { latitude, longitude });
-    return response.data;
+    return tryBackendThenFrontend(
+      // Backend call
+      async () => {
+        const response = await backendApi.post('/detect-district', { latitude, longitude });
+        return response.data;
+      },
+      // Frontend fallback
+      async () => {
+        const response = await frontendApi.post('/api/detect-district', { latitude, longitude });
+        return response.data;
+      }
+    );
   },
 
   getSnapshotDate: async (): Promise<{ snapshot_date?: string }> => {
-    const url = API_BASE_URL ? '/api/snapshot-date' : '/api/snapshot-date';
-    const response = await api.get(url);
-    return response.data;
+    return tryBackendThenFrontend(
+      // Backend call
+      async () => {
+        const response = await backendApi.get('/snapshot-date');
+        return response.data;
+      },
+      // Frontend fallback
+      async () => {
+        const response = await frontendApi.get('/api/snapshot-date');
+        return response.data;
+      }
+    );
   },
 };
 
