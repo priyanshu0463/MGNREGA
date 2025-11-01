@@ -1,0 +1,32 @@
+# Railway Environment Variables Reference
+
+## Service: mgnrega-api
+
+Add these in Railway → mgnrega-api → Variables:
+
+DATABASE_URL=postgresql://postgres:PASSWORD@HOST:PORT/railway
+DATAGOV_KEY=your_api_key_here
+DATAGOV_RESOURCE_ID=your_resource_id_here
+INGEST_STATE=Uttar Pradesh
+
+## Service: mgnrega-frontend
+
+NEXT_PUBLIC_API_URL=https://mgnrega-api-production.up.railway.app
+
+## Service: mgnrega-worker (if exists)
+
+DATABASE_URL=postgresql://postgres:PASSWORD@HOST:PORT/railway
+REDIS_URL=redis://HOST:PORT
+DATAGOV_KEY=your_api_key_here
+DATAGOV_RESOURCE_ID=your_resource_id_here
+INGEST_STATE=Uttar Pradesh
+
+## How to Add in Railway:
+1. Open Railway dashboard
+2. Click on service name (e.g., "mgnrega-api")
+3. Click "Variables" tab
+4. Click "+ New Variable"
+5. Enter variable name and value
+6. Click "Add"
+7. Service will auto-restart
+

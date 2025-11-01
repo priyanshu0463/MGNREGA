@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: postgis/postgis:14-3.4
@@ -39,10 +37,8 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - db
+      - redis
     restart: unless-stopped
 
   worker:
@@ -57,10 +53,8 @@ services:
       DATAGOV_RESOURCE_ID: ${DATAGOV_RESOURCE_ID:-}
       INGEST_STATE: ${INGEST_STATE:-Uttar Pradesh}
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - db
+      - redis
     restart: unless-stopped
 
   frontend:
